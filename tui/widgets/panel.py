@@ -38,11 +38,14 @@ class Panel(Widget):
 		if self.background and self.style is not None:
 			n = self.style.textures["Panel"]
 			renderer.nine_patch_object(n, *self.get_corrected_bounds_no_intersect().packed())
-		#renderer.clip_start(*self.get_corrected_bounds().packed())
 		for w in self.children:
 			if w.visible:
+				b = w.get_corrected_bounds()
+				b.y -= 1
+				b.h += 1
+				renderer.clip_start(*b.packed())
 				w.render(renderer)
-		#renderer.clip_end()
+				renderer.clip_end()
 
 	def handle_events(self, event):
 		for w in self.children:

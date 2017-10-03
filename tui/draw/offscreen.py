@@ -46,12 +46,12 @@ class ObjectTexture(Output):
 		if shad is not None:
 			shad.setSource(VS, FS, True)
 
-		self.__scissor = False
 		self.__lx = 0
 		self.__ly = 0
 
 	def get_mouse_position(self):
-		mx, my = logic.mouse.position
+		mx = logic.mouse.inputs[events.MOUSEX].values[-1] / render.getWindowWidth()
+		my = logic.mouse.inputs[events.MOUSEY].values[-1] / render.getWindowHeight()
 		cam = self.object.scene.active_camera
 		svec = cam.getScreenVect(mx, my)
 		camPos = cam.worldPosition

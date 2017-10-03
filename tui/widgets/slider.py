@@ -75,7 +75,7 @@ class Slider(Widget):
 		track = self.__track_size()
 		size = b.w if self.orientation == ORIENTATION_HORIZONTAL else b.h
 		pos = b.x if self.orientation == ORIENTATION_HORIZONTAL else b.y
-		
+
 		trange = Range(thumb/2, track-thumb/2)
 		cp = p - pos
 		if cp <= 0:
@@ -123,7 +123,7 @@ class Slider(Widget):
 		else:
 			t = self.style.textures["Slider_Track_disabled"]
 			n = self.style.textures["Slider_Thumb_disabled"]
-		
+
 		if t and n:
 			b = self.get_corrected_bounds_no_intersect()
 			renderer.nine_patch_object(t, *b.packed())

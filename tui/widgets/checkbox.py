@@ -24,6 +24,10 @@ class CheckBox(Label):
 				cl(self, prev)
 
 	def render(self, renderer):
+		pl = self.padding[0] * self.tui.x_scaling
+		pr = self.padding[1] * self.tui.x_scaling
+		pb = self.padding[2] * self.tui.y_scaling
+		pt = self.padding[3] * self.tui.y_scaling
 		if self.style is not None:
 			cb = None
 			cm = None
@@ -43,20 +47,18 @@ class CheckBox(Label):
 					self.tui.x_scaling, self.tui.y_scaling,
 					self.font_size
 				)
-				iw = cb.texture.width * self.tui.x_scaling
-				ih = cb.texture.height * self.tui.y_scaling
-				if iw > 24:
-					iw = 24
-				if ih > 24:
-					ih = 24
-
+				sz = min(w, h)
+				isz = max(cb.width, cb.height)
+				ratio = sz / isz
+				iw = min(cb.width * ratio, cb.width)
+				ih = min(cb.height * ratio, cb.height)
+				
 				self.pref_size = (w + iw, h)
 
 				nbounds = self.get_corrected_bounds_no_intersect()
 				bounds = self.get_corrected_bounds_no_intersect()
-				pad = 4 * self.tui.x_scaling
-				bounds.x += iw + pad
-				bounds.w -= (iw + pad) * 2
+				bounds.x += iw
+				bounds.w -= iw * 2
 				iy = bounds.h / 2 - ih / 2
 
 				cbounds = Rect(nbounds.x + 1, nbounds.y + iy, iw, ih)
@@ -64,20 +66,24 @@ class CheckBox(Label):
 				if self.checked:
 					renderer.nine_patch_object(cm, *cbounds.packed())
 
-				color = self.style.text_color if self.enabled else self.style.disabled_text_color
 				x = bounds.x
 				y = bounds.y
 
 				if (self.text_align & ALIGN_CENTER) == ALIGN_CENTER:
 					x += bounds.w / 2 - w / 2
 				elif (self.text_align & ALIGN_RIGHT) == ALIGN_RIGHT:
-					x += bounds.w - w
+					x += (bounds.w - w) - pr
+				elif (self.text_align & ALIGN_LEFT) == ALIGN_LEFT:
+					x += pl
 
 				if (self.text_align & ALIGN_MIDDLE) == ALIGN_MIDDLE:
 					y += (bounds.h / 2 - h / 2)
 				elif (self.text_align & ALIGN_BOTTOM) == ALIGN_BOTTOM:
-					y += bounds.h - h
+					y += (bounds.h - h) - pb
+				elif (self.text_align & ALIGN_TOP) == ALIGN_TOP:
+					y += pt
 
+				color = self.style.text_color if self.enabled else self.style.disabled_text_color
 				renderer.end()
 				renderer.text(
 					self.style.font.id,

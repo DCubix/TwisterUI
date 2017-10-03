@@ -64,8 +64,8 @@ class TUI:
 		for w in self.widgets:
 			if w.visible and w.parent is None:
 				b = w.get_corrected_bounds()
-				b.y -= 2
-				b.h += 4
+				b.y -= 1
+				b.h += 1
 				self.renderer.clip_start(*b.packed())
 				w.render(self.renderer)
 				self.renderer.clip_end()

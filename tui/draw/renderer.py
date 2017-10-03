@@ -107,8 +107,13 @@ class Renderer:
 		varying vec2 vs_texCoord;
 		uniform vec4 color;
 		uniform sampler2D tex0;
+		uniform float gray;
 		void main() {
-			gl_FragColor = texture2D(tex0, vs_texCoord) * color;
+			vec4 scol = texture2D(tex0, vs_texCoord);
+			if (gray > 0.0) {
+				scol.rgb = dot(scol.rgb, vec3(0.299, 0.587, 0.114));
+			}
+			gl_FragColor = scol * color;
 		}
 		"""
 
@@ -132,7 +137,7 @@ class Renderer:
 		self.shader.get_uniform("tex0").set_sampler(0)
 		glBindVertexArray(self.vao[0])
 
-	def nine_patch_object(self, nine_patch, bx, by, bw, bh, color=(1, 1, 1, 1)):
+	def nine_patch_object(self, nine_patch, bx, by, bw, bh, color=(1, 1, 1, 1), gray=False):
 		self.nine_patch(
 			nine_patch.texture,
 			bx, by, bw, bh,
@@ -141,13 +146,14 @@ class Renderer:
 			nine_patch.margin_bottom,
 			nine_patch.margin_top,
 			nine_patch.uv,
-			color
+			color, gray
 		)
 
 	def nine_patch(self, tex, bx, by, bw, bh,
 					lp=0, rp=0, bp=0, tp=0,
 					uv=(0, 0, 1, 1),
-					color=(1, 1, 1, 1)):
+					color=(1, 1, 1, 1),
+					gray=False):
 		bx = int(bx)
 		by = int(by)
 		bw = int(bw)
@@ -165,7 +171,7 @@ class Renderer:
 			self.draw(tex,
 				bx, by, lp, tp,
 				(uv[0], uv[1], luv, tuv),
-				color
+				color, gray
 			)
 		
 		## Middle Left
@@ -173,7 +179,7 @@ class Renderer:
 			self.draw(tex,
 				bx, by + tp, lp, bh - (tp+bp),
 				(uv[0], uv[1] + tuv, luv, uv[3] - (tuv+buv)),
-				color
+				color, gray
 			)
 		
 		## Bottom Left
@@ -181,7 +187,7 @@ class Renderer:
 			self.draw(tex,
 				bx, by + (bh - bp), lp, bp,
 				(uv[0], uv[1] + (uv[3] - buv), luv, buv),
-				color
+				color, gray
 			)
 		
 		## Top Center
@@ -189,14 +195,14 @@ class Renderer:
 			self.draw(tex,
 				bx + lp, by, bw - (lp+rp), tp,
 				(uv[0] + luv, uv[1], uv[2] - (luv+ruv), tuv),
-				color
+				color, gray
 			)
 
 		## Middle Center
 		self.draw(tex,
 			bx + lp, by + tp, bw - (lp+rp), bh - (tp+bp),
 			(uv[0] + luv, uv[1] + tuv, uv[2] - (luv+ruv), uv[3] - (tuv+buv)),
-			color
+			color, gray
 		)
 		
 		## Bottom Center
@@ -204,7 +210,7 @@ class Renderer:
 			self.draw(tex,
 				bx + lp, by + (bh - bp), bw - (lp+rp), bp,
 				(uv[0] + luv, uv[1] + (uv[3] - buv), uv[2] - (luv+ruv), buv),
-				color
+				color, gray
 			)
 		
 		## Top Right
@@ -212,7 +218,7 @@ class Renderer:
 			self.draw(tex,
 				bx + (bw - rp), by, rp, tp,
 				(uv[0] + (uv[2] - ruv), uv[1], ruv, tuv),
-				color
+				color, gray
 			)
 		
 		## Middle Right
@@ -220,7 +226,7 @@ class Renderer:
 			self.draw(tex,
 				bx + (bw - rp), by + tp, rp, bh - (tp+bp),
 				(uv[0] + (uv[2] - ruv), uv[1] + tuv, ruv, uv[3] - (tuv+buv)),
-				color
+				color, gray
 			)
 		
 		## Bottom Right
@@ -228,14 +234,15 @@ class Renderer:
 			self.draw(tex,
 				bx + (bw - rp), by + (bh - bp), rp, bp,
 				(uv[0] + (uv[2] - ruv), uv[1] + (uv[3] - buv), ruv, buv),
-				color
+				color, gray
 			)
 
-	def draw(self, tex, x, y, w, h, uv=(0, 0, 1, 1), color=(1, 1, 1, 1)):
+	def draw(self, tex, x, y, w, h, uv=(0, 0, 1, 1), color=(1, 1, 1, 1), gray=False):
 		tex.bind(0)
 		self.shader.get_uniform("clipRect").set_value(uv)
 		self.shader.get_uniform("transform").set_value((x, y, w, h))
 		self.shader.get_uniform("color").set_value(color)
+		self.shader.get_uniform("gray").set_value(1 if gray else 0)
 		GL.glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, None)
 		tex.unbind()
 

@@ -8,18 +8,20 @@ ALIGN_MIDDLE = 32
 ALIGN_BOTTOM = 64
 
 class Label(Widget):
-	def __init__(self, text="", text_align=(ALIGN_LEFT | ALIGN_TOP), image_align=ALIGN_CENTER, image=None):
+	def __init__(self, text="", text_align=(ALIGN_LEFT | ALIGN_MIDDLE), image_align=ALIGN_CENTER, image=None):
 		super().__init__()
 		self.text = text
 		self.text_align = text_align
 		self.image = image
 		self.image_align = image_align
-		self.font_size = 10.0
+		self.font_size = 8.0
+		self.font = None
 		self.padding = [4, 4, 4, 4]
 
-		self.bounds.set_value(0, 0, 190, 190)
+		self.bounds.set_value(0, 0, 190, 32)
 
 		self.pref_size = (0, 0)
+		self.auto_size = True
 
 	def get_preferred_size(self):
 		if self.style is None:
@@ -65,8 +67,9 @@ class Label(Widget):
 			renderer.end() ## We need to end the rendering in order
 						   ## to draw the text with BLF, because it doesn't like
 						   ## VAOs...
+			fid = self.style.font.id if self.font is None else self.font.id
 			renderer.text(
-				self.style.font.id,
+				fid,
 				self.text,
 				x, y,
 				color,

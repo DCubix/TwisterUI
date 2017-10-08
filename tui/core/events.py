@@ -6,6 +6,7 @@ EVENT_TYPE_MOUSE_MOTION = 1
 EVENT_TYPE_KEY = 2
 EVENT_TYPE_FOCUS = 3
 EVENT_TYPE_SCROLL = 4
+EVENT_TYPE_TEXT = 5
 
 class Event:
 	def get_type(self):
@@ -54,14 +55,22 @@ class FocusEvent(Event):
 class KeyEvent(Event):
 	def __init__(self, key, mod, status):
 		self.key = key
-		self.mod = mod
+		self.modifiers = mod
 		self.status = status
 
 	def get_type(self):
 		return EVENT_TYPE_KEY
 
+class TextEvent(Event):
+	def __init__(self, character):
+		self.character = character
+	
+	def get_type(self):
+		return EVENT_TYPE_TEXT
+
 class MouseButtonEvent(Event):
 	def __init__(self, button, status, x, y):
+		self.modifiers = []
 		self.button = button
 		self.status = status
 		self.x = x

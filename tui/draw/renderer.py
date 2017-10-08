@@ -1,6 +1,9 @@
 from OpenGL import GL
 import numpy
 import blf
+import math
+import colorsys
+
 from ctypes import c_void_p
 
 from .shader import ShaderProgram
@@ -77,14 +80,14 @@ class Renderer:
 				1.0, 1.0,
 				0.0, 1.0
 		])
-		inds = Buffer(GL_INT, 4, [0, 1, 3, 2])
+		inds = Buffer(GL_INT, 6, [0, 1, 2, 2, 3, 0])
 
 		glBindVertexArray(self.vao[0])
 		glBindBuffer(GL_ARRAY_BUFFER, self.vbo[0])
 		glBufferData(GL_ARRAY_BUFFER, 8 * 4, verts, GL_STATIC_DRAW)
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self.ibo[0])
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 16, inds, GL_STATIC_DRAW)
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * 4, inds, GL_STATIC_DRAW)
 
 		glEnableVertexAttribArray(0)
 		GL.glVertexAttribPointer(0, 2, GL.GL_FLOAT, False, 8, None)
@@ -122,11 +125,18 @@ class Renderer:
 		self.shader.add(FS, GL_FRAGMENT_SHADER)
 		self.shader.link()
 
+		self.__dtex = Texture(1, 1, numpy.array([255, 255, 255, 255], dtype=numpy.uint8))
+
 	def begin(self):
+		glEnable(GL_POLYGON_SMOOTH)
+		glEnable(GL_LINE_SMOOTH)
+		glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST)
+		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
 		glEnable(GL_BLEND)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 		glDisable(GL_CULL_FACE)
+		glDisable(GL_LIGHTING)
 		glMatrixMode(GL_PROJECTION)
 		glLoadIdentity()
 		glOrtho(0, self.output.width, self.output.height, 0, -1, 1)
@@ -237,14 +247,51 @@ class Renderer:
 				color, gray
 			)
 
+	def color_wheel(self, x, y, radius, value=1.0, res=32, gray=False):
+		self.end()
+		px = 0
+		py = 0
+		steps = int(360 / res)
+		fx = x
+		fy = y
+
+		glBegin(GL_TRIANGLE_FAN)
+		glColor3f(*colorsys.hsv_to_rgb(0, 0, value))
+		glVertex2f(fx + px, fy + py)
+		for i in range(0, 360+steps, steps):
+			rad = math.radians(i)
+			px = math.cos(rad) * radius
+			py = math.sin(rad) * radius
+			col = [*colorsys.hsv_to_rgb(i / 360, 1.0, value)]
+			if not gray:
+				glColor3f(*col)
+			else:
+				g = (col[0] + col[1] + col[2]) / 3.0
+				glColor3f(g, g, g)
+			glVertex2f(fx + px, fy + py)
+		glEnd()
+		self.begin()
+
 	def draw(self, tex, x, y, w, h, uv=(0, 0, 1, 1), color=(1, 1, 1, 1), gray=False):
 		tex.bind(0)
 		self.shader.get_uniform("clipRect").set_value(uv)
 		self.shader.get_uniform("transform").set_value((x, y, w, h))
 		self.shader.get_uniform("color").set_value(color)
 		self.shader.get_uniform("gray").set_value(1 if gray else 0)
-		GL.glDrawElements(GL_TRIANGLE_STRIP, 4, GL_UNSIGNED_INT, None)
+		GL.glDrawElements(GL_TRIANGLE_STRIP, 6, GL_UNSIGNED_INT, None)
 		tex.unbind()
+
+	def rectangle(self, x, y, w, h, color=(1, 1, 1, 1), wire=False):
+		self.__dtex.bind(0)
+		self.shader.get_uniform("clipRect").set_value((0, 0, 1, 1))
+		self.shader.get_uniform("transform").set_value((x, y, w, h))
+		self.shader.get_uniform("color").set_value(color)
+		self.shader.get_uniform("gray").set_value(0)
+		if wire:
+			GL.glDrawElements(GL_LINE_LOOP, 6, GL_UNSIGNED_INT, None)
+		else:
+			GL.glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, None)
+		self.__dtex.unbind()
 
 	def end(self):
 		self.shader.unbind()
@@ -285,6 +332,28 @@ class Renderer:
 		else:
 			glScissor(0, 0, self.output.width, self.output.height)
 			glDisable(GL_SCISSOR_TEST)
+
+	def begin_text(self):
+		glPushMatrix()
+	
+	def end_text(self):
+		glPopMatrix()
+
+	def char(self, fid, c, x, y, color=(1.0, 1.0, 1.0), aspect=1.0, rx=1.0, ry=1.0, size=12.0):
+		if len(c) > 1:
+			c = c[0]
+		w, h = blf.dimensions(fid, c)
+		blf.position(fid, int(x), int(-y), 0)
+		blf.size(fid, int(size * max(rx, ry)), 72)
+		blf.aspect(fid, aspect)
+
+		glTranslatef(0, h, 0)
+		glScalef(1, -1, 1)
+
+		glColor3f(*color)
+		blf.draw(fid, c)
+
+		return x + w
 
 	def text(self, fid, text, x, y, color=(1.0, 1.0, 1.0), aspect=1.0, rx=1.0, ry=1.0, size=12.0):
 		_, h = blf.dimensions(fid, text)

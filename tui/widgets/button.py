@@ -9,6 +9,7 @@ class Button(Label):
 
 		self.clicked = False
 		self.hovered = False
+		self.auto_size = False
 
 	def render(self, renderer):
 		if self.style is None:
@@ -29,23 +30,22 @@ class Button(Label):
 		super().render(renderer)
 	
 	def handle_events(self, event):
-		e = event
-		if e.get_type() == EVENT_TYPE_MOUSE_BUTTON:
-			if self.get_corrected_bounds().has_point(e.x, e.y) and self.enabled:
-				if e.status:
+		if event.get_type() == EVENT_TYPE_MOUSE_BUTTON:
+			if self.get_corrected_bounds().has_point(event.x, event.y) and self.enabled:
+				if event.status:
 					self.clicked = True
 				else:
 					if self.clicked:
 						self.clicked = False
 						for listener in self.click_listeners:
-							listener(self, e)
+							listener(self, event)
 			else:
 				self.clicked = False
 				self.hovered = False
-		elif e.get_type() == EVENT_TYPE_MOUSE_MOTION:
-			if self.get_corrected_bounds().has_point(e.x, e.y):
+		elif event.get_type() == EVENT_TYPE_MOUSE_MOTION:
+			if self.get_corrected_bounds().has_point(event.x, event.y):
 				self.hovered = True
 			else:
 				self.clicked = False
 				self.hovered = False
-		return super().handle_events(e)
+		return super().handle_events(event)

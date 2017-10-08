@@ -11,4 +11,4 @@ class Viewport(Output):
 	def get_mouse_position(self):
 		mx = logic.mouse.inputs[events.MOUSEX].values[-1]
 		my = logic.mouse.inputs[events.MOUSEY].values[-1]
-		return (mx, my)
+		return (mx, my, True)

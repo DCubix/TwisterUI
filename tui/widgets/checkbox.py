@@ -50,8 +50,8 @@ class CheckBox(Label):
 				sz = min(w, h)
 				isz = max(cb.width, cb.height)
 				ratio = sz / isz
-				iw = min(cb.width * ratio, cb.width)
-				ih = min(cb.height * ratio, cb.height)
+				iw = max(cb.width * ratio, cb.width)
+				ih = max(cb.height * ratio, cb.height)
 				
 				self.pref_size = (w + iw, h)
 
@@ -85,8 +85,9 @@ class CheckBox(Label):
 
 				color = self.style.text_color if self.enabled else self.style.disabled_text_color
 				renderer.end()
+				fid = self.style.font.id if self.font is None else self.font.id
 				renderer.text(
-					self.style.font.id,
+					fid,
 					self.text,
 					x, y,
 					color,

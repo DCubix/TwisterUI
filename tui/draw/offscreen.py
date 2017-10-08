@@ -6,12 +6,13 @@ from .texture import Texture
 from bgl import *
 
 class ObjectTexture(Output):
-	def __init__(self, obj, width, height):
+	def __init__(self, obj, width, height, ray_dist=20.0):
 		super().__init__()
 		self.object = obj
 		self.width = width
 		self.height = height
 		self.background = (0.0, 0.0, 0.0, 0.0)
+		self.ray_dist = ray_dist
 
 		self.texture = Texture(width, height)
 
@@ -55,17 +56,17 @@ class ObjectTexture(Output):
 		cam = self.object.scene.active_camera
 		svec = cam.getScreenVect(mx, my)
 		camPos = cam.worldPosition
-		z = 1000.0
+		z = self.ray_dist
 		projectedPos = camPos - svec * z
 		
-		ob, _, _, _, uv = cam.rayCast(projectedPos, None, 0, "", True, False, 2)
+		ob, _, _, _, uv = cam.rayCast(projectedPos, None, self.ray_dist, "", True, False, 2)
 		if ob == self.object:
 			mx = uv.x * self.width
 			my = uv.y * self.height
 			self.__lx = mx
 			self.__ly = my
-			return (int(mx), self.height - int(my))
-		return (self.__lx, self.__ly)
+			return (int(mx), int(self.height - my), True)
+		return (self.__lx, self.__ly, False)
 
 	def bind(self):
 		glBindFramebuffer(GL_FRAMEBUFFER, self.bindCode[0])

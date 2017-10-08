@@ -67,8 +67,7 @@ class Widget(EventSubscriber):
 
 	def handle_events(self, event):
 		if event.get_type() == EVENT_TYPE_MOUSE_BUTTON and self.enabled and self.visible:
-			bounds = self.get_corrected_bounds()
-			if bounds.has_point(event.x, event.y) and event.status:
+			if self.get_corrected_bounds().has_point(event.x, event.y) and event.status:
 				self.request_focus()
 				return EVENT_STATUS_CONSUMED
 		return EVENT_STATUS_AVAILABLE

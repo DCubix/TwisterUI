@@ -153,6 +153,7 @@ class Slider(Widget):
 			else:
 				if not self.clicked:
 					self.hover = False
+				self.clicked = False
 			if self.clicked:
 				self.__update_slider(event.x if self.orientation == ORIENTATION_HORIZONTAL else event.y)
 		return super().handle_events(event)

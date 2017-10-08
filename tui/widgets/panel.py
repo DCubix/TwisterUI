@@ -37,7 +37,8 @@ class Panel(Widget):
 	def render(self, renderer):
 		if self.background and self.style is not None:
 			n = self.style.textures["Panel"]
-			renderer.nine_patch_object(n, *self.get_corrected_bounds_no_intersect().packed())
+			b = self.get_corrected_bounds_no_intersect()
+			renderer.nine_patch_object(n, *b.packed())
 		for w in self.children:
 			if w.visible:
 				b = w.get_corrected_bounds()

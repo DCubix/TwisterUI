@@ -22,6 +22,16 @@ class TUI:
 		self.px = 0
 		self.py = 0
 
+		self.__keys_down = {}
+
+	def refresh(self, widget_list=None):
+		if widget_list is None:
+			widget_list = self.widgets
+		for w in widget_list:
+			w.style = self.global_style
+			if hasattr(w, "children"):
+				self.refresh(w.children)
+
 	def set_focus(self, widget):
 		if self.focused == widget:
 			return
@@ -31,6 +41,7 @@ class TUI:
 		if widget is not None:
 			widget.focused = True
 			self.event_handler.send(FocusEvent(widget.focused))
+		self.focused = widget
 
 	def add(self, widget):
 		if widget in self.widgets:
@@ -44,6 +55,7 @@ class TUI:
 		self.event_handler.bind(widget, EVENT_TYPE_MOUSE_BUTTON)
 		self.event_handler.bind(widget, EVENT_TYPE_MOUSE_MOTION)
 		self.event_handler.bind(widget, EVENT_TYPE_SCROLL)
+		self.event_handler.bind(widget, EVENT_TYPE_TEXT)
 		return widget
 
 	def reset(self):
@@ -83,23 +95,64 @@ class TUI:
 			events.MIDDLEMOUSE,
 			events.RIGHTMOUSE
 		]
-		mx, my = self.output.get_mouse_position()
+
+		## Modifiers
+		mods = []
+		for ev in [events.LEFTSHIFTKEY, events.RIGHTSHIFTKEY, events.LEFTALTKEY, events.RIGHTALTKEY,	events.LEFTCTRLKEY, events.RIGHTCTRLKEY]:
+			if logic.keyboard.inputs[ev].active:
+				mods.append(ev)
+
+		mx, my, on_screen = self.output.get_mouse_position()
 		mbe = MouseButtonEvent(0, 0, mx, my)
 		for e in mouse_button_events:
+			mbe.modifiers = mods
 			mbe.button = e
-			if logic.mouse.inputs[e].activated:
+			if logic.mouse.inputs[e].activated and on_screen:
 				mbe.status = True
 				self.event_handler.send(mbe)
-			elif logic.mouse.inputs[e].released:
+			elif logic.mouse.inputs[e].released and on_screen:
 				mbe.status = False
 				self.event_handler.send(mbe)
 
 		## Mouse motion event
-		mme = MouseMotionEvent(mx, my, mx - self.px, my - self.py)
-		self.event_handler.send(mme)
+		if on_screen:
+			mme = MouseMotionEvent(mx, my, mx - self.px, my - self.py)
+			self.event_handler.send(mme)
+
+		## Mouse wheel events
+		if on_screen:
+			delta = 0
+			if logic.mouse.inputs[events.WHEELUPMOUSE].activated:
+				delta = 1
+			elif logic.mouse.inputs[events.WHEELDOWNMOUSE].activated:
+				delta = -1
+			if abs(delta) > 0:
+				self.event_handler.send(ScrollEvent(delta))
 
 		self.px = mx
 		self.py = my
+
+		## Key events
+		for i in range(0, 256):
+			shift = logic.keyboard.inputs[events.LEFTSHIFTKEY].active or \
+					logic.keyboard.inputs[events.RIGHTSHIFTKEY].active
+			try:
+				# Text Event
+				if logic.keyboard.inputs[i].activated:
+					c = events.EventToCharacter(i, shift)
+					if len(c) > 0:
+						self.event_handler.send(TextEvent(c))
+				
+				# Key Event
+				if logic.keyboard.inputs[i].activated:
+					self.event_handler.send(KeyEvent(i, mods, True))
+					self.__keys_down[i] = True
+				else:
+					if self.__keys_down[i] == True:
+						self.event_handler.send(KeyEvent(i, mods, False))
+						self.__keys_down[i] = False
+			except KeyError:
+				continue
 
 	@property
 	def x_scaling(self):

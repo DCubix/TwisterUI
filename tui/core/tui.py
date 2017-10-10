@@ -1,10 +1,26 @@
-from bge import render, logic, events
-from tui.draw.renderer import Renderer
-from tui.draw.viewport import Viewport
+"""
+File: core/tui.py
+Description: User interface management and logic
+Author:	Diego Lopes (TwisterGE/DCubix) < diego95lopes@gmail.com >
+"""
+
+from bge import render, logic, events, types
+from tui.draw import Viewport, ObjectTexture, Renderer
 from .style import Style
 from .events import *
 
 class TUI:
+	"""
+	Main UI handling system.
+	Attributes:
+		virtual_width: Virtual width of the GUI.
+		virtual_height: Virtual height of the GUI.
+		event_handler: Event handler object.
+		renderer: Renderer object.
+		widgets: List of widgets.
+		focused: Currently focused widget.
+		global_style: Main style file for all the widgets. (Use refresh() to apply changes).
+	"""
 	def __init__(self, styleFile, output=None, virtual_width=1280, virtual_height=720):
 		self.__output = output if output is not None else Viewport(render.getWindowWidth(), render.getWindowHeight())
 
@@ -25,6 +41,12 @@ class TUI:
 		self.__keys_down = {}
 
 	def refresh(self, widget_list=None):
+		"""
+		Refresh all the widgets recursively to apply changed to the
+		global style.
+		Args:
+			widget_list: List of widgets to apply the global style to.
+		"""
 		if widget_list is None:
 			widget_list = self.widgets
 		for w in widget_list:
@@ -33,6 +55,12 @@ class TUI:
 				self.refresh(w.children)
 
 	def set_focus(self, widget):
+		"""
+		Set the specified widget (if valid) to focused
+		and blurs the previous widget. See: Widget.request_focus()
+		Args:
+			widget: A widget or None.
+		"""
 		if self.focused == widget:
 			return
 		if self.focused is not None:
@@ -44,6 +72,11 @@ class TUI:
 		self.focused = widget
 
 	def add(self, widget):
+		"""
+		Adds a new widget to the system.
+		Args:
+			widget: A valid not-yet-added widget.
+		"""
 		if widget in self.widgets:
 			return widget
 
@@ -58,11 +91,9 @@ class TUI:
 		self.event_handler.bind(widget, EVENT_TYPE_TEXT)
 		return widget
 
-	def reset(self):
-		self.widgets = []
-
 	@property
 	def output(self):
+		"""Gets/Sets the output method used by this system."""
 		return self.__output
 
 	@output.setter
@@ -156,12 +187,59 @@ class TUI:
 
 	@property
 	def x_scaling(self):
+		"""X aspect ratio between the output width and the virtual width."""
 		return self.output.width / self.virtual_width
 
 	@property
 	def y_scaling(self):
+		"""Y aspect ratio between the output height and the virtual height."""
 		return self.output.height / self.virtual_height
 
 	@property
 	def virtual_aspect(self):
+		"""Virtual aspect ratio."""
 		return self.virtual_width / self.virtual_height
+
+	@staticmethod
+	def __tui_render():
+		if not hasattr(logic, "tuis"):
+			return
+		for scene, tui in logic.tuis.items():
+			tui.render()
+
+	@staticmethod
+	def main_loop():
+		"""Update all the systems registered."""
+		if not hasattr(logic, "tuis"):
+			return
+		for scene, tui in logic.tuis.items():
+			tui.update()
+
+	@staticmethod
+	def get_tui(obj, styleFile, width=1280, height=720, resolution=1):
+		"""Gets or creates a system from an object or a scene."""
+		if not isinstance(obj, types.KX_Scene) and not isinstance(obj, types.KX_GameObject):
+			raise ValueError("Object must be a KX_Scene or a KX_GameObject.")
+			return
+		if not hasattr(logic, "tuis"):
+			logic.tuis = {}
+			logic.tui_scenes = []
+
+		scene = None
+		w = width * resolution
+		h = height * resolution
+		if isinstance(obj, types.KX_Scene):
+			scene = obj
+			output = Viewport(w, h)
+		else:
+			scene = obj.scene
+			output = ObjectTexture(obj, w, h)
+		if obj not in logic.tuis:
+			if styleFile is None:
+				raise ValueError("Style file must not be None.")
+				return
+			logic.tuis[obj] = TUI(styleFile, output, width, height)
+			if scene not in logic.tui_scenes:
+				scene.post_draw.append(TUI.__tui_render)
+				logic.tui_scenes.append(scene)
+		return logic.tuis[obj]

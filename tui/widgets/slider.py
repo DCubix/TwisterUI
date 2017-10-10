@@ -1,3 +1,9 @@
+"""
+File: widgets/slider.py
+Description: Can turn into a switch
+Author:	Diego Lopes (TwisterGE/DCubix) < diego95lopes@gmail.com >
+"""
+
 from tui.core import Widget, EVENT_TYPE_SCROLL, EVENT_TYPE_MOUSE_BUTTON, EVENT_TYPE_MOUSE_MOTION, EVENT_STATUS_CONSUMED
 from tui.draw import Rect
 
@@ -8,6 +14,9 @@ def roundPartial(value, resolution):
 	return round(value / resolution) * resolution
 
 class Range:
+	"""
+	General-purpose Range handling.
+	"""
 	def __init__(self, minimum=0, maximum=1):
 		self.minimum = minimum
 		self.maximum = maximum
@@ -26,7 +35,17 @@ class Range:
 		return abs(self.maximum - self.minimum)
 
 class Slider(Widget):
-	def __init__(self, minimum=0, maximum=100, step=10, rounded=False):
+	"""
+	Slider.
+	Can be used as a switch or a scroll bar.
+	Attributes:
+		range: Range object. Set this to specify limits.
+		step: How many steps to increase/decrease the value.
+		rounded: Round/Snap the value to step.
+		orientation: Slider orientation. One of: ORIENTATION_HORIZONTAL, ORIENTATION_VERTICAL.
+		change_listeners: Change event listeners.
+	"""
+	def __init__(self, minimum=0, maximum=100, step=1, rounded=False):
 		super().__init__()
 		self.range = Range(minimum, maximum)
 		self.step = step
@@ -153,7 +172,6 @@ class Slider(Widget):
 			else:
 				if not self.clicked:
 					self.hover = False
-				self.clicked = False
 			if self.clicked:
 				self.__update_slider(event.x if self.orientation == ORIENTATION_HORIZONTAL else event.y)
 		return super().handle_events(event)

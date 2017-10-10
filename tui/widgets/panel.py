@@ -1,8 +1,21 @@
+"""
+File: widgets/panel.py
+Description: Basic widget container
+Author:	Diego Lopes (TwisterGE/DCubix) < diego95lopes@gmail.com >
+"""
+
 from tui.core import Widget
 from tui.draw import Rect
 from tui.core import EVENT_STATUS_CONSUMED, EVENT_STATUS_AVAILABLE
 
 class Panel(Widget):
+	"""
+	Panel.
+	Attributes:
+		children: List of widgets.
+		background: Enable/Disable background rendering.
+		layout: Layout manager.
+	"""
 	def __init__(self, layout=None):
 		super().__init__()
 
@@ -14,6 +27,12 @@ class Panel(Widget):
 		return Rect(1, 1, self.bounds.w - 2, self.bounds.h - 2)
 
 	def add(self, widget, layout_args=-1):
+		"""
+		Adds a new widget to the container.
+		Args:
+			widget: A valid not-yet-added widget.
+			layout_args: Arguments for the layout manager.
+		"""
 		widget.style = self.style
 		if widget.parent == self:
 			return self

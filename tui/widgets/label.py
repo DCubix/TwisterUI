@@ -1,3 +1,9 @@
+"""
+File: widgets/label.py
+Description: A string on the screen
+Author:	Diego Lopes (TwisterGE/DCubix) < diego95lopes@gmail.com >
+"""
+
 from tui.core import Widget
 
 ALIGN_LEFT = 2
@@ -8,6 +14,23 @@ ALIGN_MIDDLE = 32
 ALIGN_BOTTOM = 64
 
 class Label(Widget):
+	"""
+	Label.
+	Attributes:
+		text: Text, any string.
+		text_align: Text alignment. Bit flags.
+			- ALIGN_LEFT (x)
+			- ALIGN_CENTER (x)
+			- ALIGN_RIGHT (x)
+			- ALIGN_TOP (y)
+			- ALIGN_MIDDLE (y)
+			- ALIGN_BOTTOM (y)
+		image: Icon image.
+		image_align: Image alignment. One of the above (x) ones.
+		font: Custom font.
+		font_size: Custom font size.
+		padding: Text padding. [left, right, bottom, top]
+	"""
 	def __init__(self, text="", text_align=(ALIGN_LEFT | ALIGN_MIDDLE), image_align=ALIGN_CENTER, image=None):
 		super().__init__()
 		self.text = text

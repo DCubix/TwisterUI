@@ -1,13 +1,28 @@
+"""
+File: core/layout.py
+Description: Layout system
+Author:	Diego Lopes (TwisterGE/DCubix) < diego95lopes@gmail.com >
+"""
+
 from tui.widgets.panel import Panel
 
 class Layout:
+	"""
+	Base layout.
+	"""
 	def perform_layout(self, widget):
+		"""Applies this Layout to a container."""
 		pass
 	
 	def set_args(self, widget):
+		"""Sets the Layout arguments."""
 		pass
 
 class StackLayout(Layout):
+	"""
+	Stack layout.
+	Stacks the widgets vertically.
+	"""
 	def perform_layout(self, widget):
 		if not isinstance(widget, Panel):
 			return
@@ -24,6 +39,10 @@ class StackLayout(Layout):
 			nexty += w.bounds.h
 
 class FlowLayout(Layout):
+	"""
+	Flow layout.
+	Arranges the widgets side-by-side based on width.
+	"""
 	def perform_layout(self, widget):
 		if not isinstance(widget, Panel):
 			return
@@ -51,6 +70,11 @@ BORDER_LAYOUT_POS_TOP = 3
 BORDER_LAYOUT_POS_CENTER = 4
 
 class BorderLayout(Layout):
+	"""
+	Border layout.
+	Arranges the widgets on the borders and center of the screen.
+	Based on Java Swing's Border Layout.
+	"""
 	def __init__(self):
 		self.left = None
 		self.right = None

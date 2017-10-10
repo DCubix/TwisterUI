@@ -1,3 +1,9 @@
+"""
+File: draw/texture.py
+Description: Texture
+Author:	Diego Lopes (TwisterGE/DCubix) < diego95lopes@gmail.com >
+"""
+
 from OpenGL import GL
 from bge import texture as vtex
 import numpy

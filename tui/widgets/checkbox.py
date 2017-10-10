@@ -1,8 +1,20 @@
+"""
+File: widgets/checkbox.py
+Description: True or False
+Author:	Diego Lopes (TwisterGE/DCubix) < diego95lopes@gmail.com >
+"""
+
 from .label import *
 from tui.core import EVENT_STATUS_CONSUMED, EVENT_STATUS_AVAILABLE, EVENT_TYPE_MOUSE_BUTTON
 from tui.draw import Rect
 
 class CheckBox(Label):
+	"""
+	Check box.
+	Attributes:
+		change_listeners: Change event listener list.
+		checked: Check status.
+	"""
 	def __init__(self, text=""):
 		super().__init__(text=text, text_align=(ALIGN_LEFT | ALIGN_MIDDLE))
 

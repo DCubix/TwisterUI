@@ -1,3 +1,9 @@
+"""
+File: core/style.py
+Description: Visual style handling
+Author:	Diego Lopes (TwisterGE/DCubix) < diego95lopes@gmail.com >
+"""
+
 import json
 from bge import logic
 from tui.draw.renderer import NinePatch
@@ -5,6 +11,15 @@ from tui.draw.texture import ImageTexture
 from .font import Font
 
 class Style:
+	"""
+	Visual Style.
+	Stores the visual style data.
+	Attributes:
+		textures: Dictionary of textures in the style file.
+		font: Font object.
+		text_color: Color for all the text-based widgets.
+		disabled_text_color: Color for disabled text-based widgets.
+	"""
 
 	__cache = {}
 
@@ -18,6 +33,11 @@ class Style:
 			self.load(styleFile)
 
 	def load(self, styleFile):
+		"""
+		Loads a style from a JSON file
+		Raises:
+			Exception: If no texture regions are present in the style file.
+		"""
 		sfile = {}
 		with open(styleFile) as fp:
 			sfile = json.load(fp)

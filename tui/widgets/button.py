@@ -1,7 +1,18 @@
+"""
+File: widgets/button.py
+Description: The good ol' Button
+Author:	Diego Lopes (TwisterGE/DCubix) < diego95lopes@gmail.com >
+"""
+
 from .label import *
 from tui.core.events import *
 
 class Button(Label):
+	"""
+	Button
+	Attributes:
+		click_listeners: Click event listeners. Append them to this list.
+	"""
 	def __init__(self, text=""):
 		super().__init__(text=text)
 		self.click_listeners = []

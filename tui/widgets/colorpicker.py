@@ -1,3 +1,9 @@
+"""
+File: widgets/colorpicker.py
+Description: Many colors
+Author:	Diego Lopes (TwisterGE/DCubix) < diego95lopes@gmail.com >
+"""
+
 import colorsys
 import math
 from tui.core import Widget
@@ -5,6 +11,13 @@ from tui.core.events import *
 from bge import events as BGE_Events
 
 class ColorPicker(Widget):
+	"""
+	Color picker.
+	Attributes:
+		hue: Color Hue.
+		saturation: Color Saturation.
+		value: Color value/lightness/brightness.
+	"""
 	def __init__(self, color=(1.0, 1.0, 1.0)):
 		super().__init__()
 		self.padding = 6

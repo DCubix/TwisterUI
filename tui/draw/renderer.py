@@ -1,3 +1,9 @@
+"""
+File: draw/renderer.py
+Description: Rendering system
+Author:	Diego Lopes (TwisterGE/DCubix) < diego95lopes@gmail.com >
+"""
+
 from OpenGL import GL
 import numpy
 import blf
@@ -8,12 +14,16 @@ from ctypes import c_void_p
 
 from .shader import ShaderProgram
 from .texture import Texture
-from .viewport import Viewport
+from .output import Viewport
 
 from bge import render
 from bgl import *
 
 class NinePatch:
+	"""
+	9-Slice texture.
+	Best alternative for high quality GUI.
+	"""
 	def __init__(self, texture, lp=0, rp=0, bp=0, tp=0, uv=(0, 0, 1, 1)):
 		self.texture = texture
 		self.margin_left = lp
@@ -55,6 +65,9 @@ class Batch:
 		self.ilen = ilen
 
 class Renderer:
+	"""
+	Advanced 2D Renderer.
+	"""
 	def __init__(self, output):
 		self.output = output
 

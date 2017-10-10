@@ -1,9 +1,25 @@
+"""
+File: widgets/edit.py
+Description: Type anything
+Author:	Diego Lopes (TwisterGE/DCubix) < diego95lopes@gmail.com >
+"""
+
 from bge import events as BGE_Events
 from bge import logic as BGE_Logic
 from tui.core import Widget
 from tui.core import EVENT_STATUS_CONSUMED, EVENT_TYPE_KEY, EVENT_TYPE_TEXT, EVENT_TYPE_FOCUS, EVENT_TYPE_MOUSE_BUTTON, EVENT_TYPE_MOUSE_MOTION
 
 class Edit(Widget):
+	"""
+	Edit box. AKA 'Text Box'.
+	Attributes:
+		text: Text, any string.
+		font: Custom font.
+		font_size: Custom font size.
+		editable: When False, makes the Edit read-only.
+		masked: Replaces all the characters with "mask".
+		mask: Mask character.
+	"""
 	def __init__(self, text=""):
 		super().__init__()
 		self.text = text

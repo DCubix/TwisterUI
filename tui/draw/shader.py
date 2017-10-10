@@ -1,3 +1,9 @@
+"""
+File: draw/shader.py
+Description: Shader
+Author:	Diego Lopes (TwisterGE/DCubix) < diego95lopes@gmail.com >
+"""
+
 from OpenGL import GL
 from bgl import *
 

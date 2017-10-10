@@ -1,3 +1,9 @@
+"""
+File: draw/rect.py
+Description: Rectangle
+Author:	Diego Lopes (TwisterGE/DCubix) < diego95lopes@gmail.com >
+"""
+
 import sys
 
 class Rect:

@@ -15,6 +15,7 @@ from ctypes import c_void_p
 from .shader import ShaderProgram
 from .texture import Texture
 from .output import Viewport
+from tui.core.font import Font
 
 from bge import render
 from bgl import *
@@ -68,8 +69,9 @@ class Renderer:
 	"""
 	Advanced 2D Renderer.
 	"""
-	def __init__(self, output):
-		self.output = output
+	def __init__(self, tui):
+		self.tui = tui
+		self.output = tui.output
 
 		self.__sprites = []
 		self.__batches = []
@@ -311,7 +313,10 @@ class Renderer:
 		glBindVertexArray(0)
 
 	def clip_start(self, sx, sy, sw, sh):
-		vp = GL.glGetIntegerv(GL_VIEWPORT)
+		try:
+			vp = GL.glGetIntegerv(GL_VIEWPORT)
+		except:
+			vp = [0, 0, render.getWindowWidth(), render.getWindowHeight()]
 		if len(self.__clip_stack) > 0:
 			px, py, pw, ph = self.__clip_stack[-1]
 			minx = max(px, sx)
@@ -352,27 +357,10 @@ class Renderer:
 	def end_text(self):
 		glPopMatrix()
 
-	def char(self, fid, c, x, y, color=(1.0, 1.0, 1.0), aspect=1.0, rx=1.0, ry=1.0, size=12.0):
-		if len(c) > 1:
-			c = c[0]
-		w, h = blf.dimensions(fid, c)
+	def text(self, fid, text, x, y, color=(1.0, 1.0, 1.0), size=12.0):
 		blf.position(fid, int(x), int(-y), 0)
-		blf.size(fid, int(size * max(rx, ry)), 72)
-		blf.aspect(fid, aspect)
-
-		glTranslatef(0, h, 0)
-		glScalef(1, -1, 1)
-
-		glColor3f(*color)
-		blf.draw(fid, c)
-
-		return x + w
-
-	def text(self, fid, text, x, y, color=(1.0, 1.0, 1.0), aspect=1.0, rx=1.0, ry=1.0, size=12.0):
+		blf.size(fid, self.font_size(size), self.font_dpi(size))
 		_, h = blf.dimensions(fid, text)
-		blf.position(fid, int(x), int(-y), 0)
-		blf.size(fid, int(size * max(rx, ry)), 72)
-		blf.aspect(fid, aspect)
 
 		glPushMatrix()
 		
@@ -383,10 +371,19 @@ class Renderer:
 		blf.draw(fid, text)
 		glPopMatrix()
 
-	def text_size(self, fid, text, aspect=1.0, rx=1.0, ry=1.0, size=12.0):
-		blf.size(fid, int(size * max(rx, ry)), 72)
-		blf.aspect(fid, aspect)
+		return h
+
+	def text_size(self, fid, text, size):
+		blf.size(fid, self.font_size(size), self.font_dpi(size))
 		return blf.dimensions(fid, text)
+
+	def font_size(self, size):
+		os = self.output.width
+		ns = self.tui.virtual_width
+		return int(Font.get_best_size(size, os, ns))
+
+	def font_dpi(self, dsize):
+		return 72
 
 	def __del__(self):
 		glDeleteVertexArrays(1, self.vao)

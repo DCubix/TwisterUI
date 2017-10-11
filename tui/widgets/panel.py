@@ -66,6 +66,7 @@ class Panel(Widget):
 				renderer.clip_start(*b.packed())
 				w.render(renderer)
 				renderer.clip_end()
+		super().render(renderer)
 
 	def handle_events(self, event):
 		for w in self.children:

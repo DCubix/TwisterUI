@@ -96,14 +96,15 @@ class ColorPicker(Widget):
 		renderer.color_wheel(x, y, hsz, gray=(not self.enabled), value=self.__value)
 
 		cur = self.style.textures["Dot"]
-		cw = cur.width * self.tui.x_scaling
-		ch = cur.height * self.tui.y_scaling
+		cw = cur.width / self.tui.virtual_aspect
+		ch = cur.height / self.tui.virtual_aspect
 		h = self.__hue * (math.pi * 2.0)
 		v = min(1.0, max(self.__saturation, 0.0))
 		hszv = hsz * v
 		cx = x + (math.cos(h) * hszv)
 		cy = y + (math.sin(h) * hszv)
 		renderer.nine_patch_object(cur, cx - cw/2, cy - ch/2, cw, ch, gray=(not self.enabled))
+		super().render(renderer)
 
 	def __update_hue(self, x, y):
 		b = self.get_corrected_bounds_no_intersect()

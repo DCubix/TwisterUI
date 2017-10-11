@@ -59,5 +59,5 @@ class Rect:
 		self.w = w
 		self.h = h
 
-	def packed(self):
-		return (self.x, self.y, self.w, self.h)
+	def packed(self, grow=0):
+		return (self.x-grow, self.y-grow, self.w+grow*2, self.h+grow*2)

@@ -137,7 +137,7 @@ class Slider(Widget):
 				n = self.style.textures["Slider_Thumb_normal"]
 			elif self.hover and not self.clicked:
 				n = self.style.textures["Slider_Thumb_hover"]
-			elif self.hover and self.clicked:
+			else:
 				n = self.style.textures["Slider_Thumb_click"]
 		else:
 			t = self.style.textures["Slider_Track_disabled"]
@@ -147,6 +147,7 @@ class Slider(Widget):
 			b = self.get_corrected_bounds_no_intersect()
 			renderer.nine_patch_object(t, *b.packed())
 			renderer.nine_patch_object(n, *self.__thumb.packed())
+		super().render(renderer)
 
 	def handle_events(self, event):
 		if event.get_type() == EVENT_TYPE_SCROLL and self.focused:
@@ -170,8 +171,7 @@ class Slider(Widget):
 			if self.get_corrected_bounds().has_point(event.x, event.y):
 				self.hover = True
 			else:
-				if not self.clicked:
-					self.hover = False
+				self.hover = False
 			if self.clicked:
 				self.__update_slider(event.x if self.orientation == ORIENTATION_HORIZONTAL else event.y)
 		return super().handle_events(event)

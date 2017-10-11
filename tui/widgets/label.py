@@ -41,14 +41,12 @@ class Label(Widget):
 		self.font = None
 		self.padding = [4, 4, 4, 4]
 
-		self.bounds.set_value(0, 0, 190, 32)
+		self.bounds.set_value(0, 0, 80, 32)
 
 		self.pref_size = (0, 0)
 		self.auto_size = True
 
 	def get_preferred_size(self):
-		if self.style is None:
-			return super().get_preferred_size()
 		if self.auto_size:
 			return self.pref_size
 		return super().get_preferred_size()
@@ -59,14 +57,14 @@ class Label(Widget):
 		pb = self.padding[2] * self.tui.y_scaling
 		pt = self.padding[3] * self.tui.y_scaling
 		if self.style is not None and len(self.text) > 0:
-			w, h = renderer.text_size(
-				self.style.font.id,
+			fid = self.style.font.id if self.font is None else self.font.id
+			renderer.end()
+			w, h = self.pref_size = renderer.text_size(
+				fid,
 				self.text,
-				self.tui.virtual_aspect,
-				self.tui.x_scaling, self.tui.y_scaling,
 				self.font_size
 			)
-			self.pref_size = (w, h)
+			renderer.begin()
 			bounds = self.get_corrected_bounds()
 			color = self.style.text_color if self.enabled else self.style.disabled_text_color
 
@@ -90,25 +88,19 @@ class Label(Widget):
 			renderer.end() ## We need to end the rendering in order
 						   ## to draw the text with BLF, because it doesn't like
 						   ## VAOs...
-			fid = self.style.font.id if self.font is None else self.font.id
 			renderer.text(
 				fid,
 				self.text,
 				x, y,
 				color,
-				self.tui.virtual_aspect,
-				self.tui.x_scaling, self.tui.y_scaling,
 				self.font_size
 			)
 			renderer.begin()
 		if self.image is not None:
 			bounds = self.get_corrected_bounds_no_intersect()
 			ix = bounds.x
-			sz = min(bounds.w, bounds.h)
-			isz = max(self.image.width, self.image.height)
-			ratio = sz / isz
-			iw = min(self.image.width * ratio, self.image.width)
-			ih = min(self.image.height * ratio, self.image.height)
+			iw = self.image.width
+			ih = self.image.height
 
 			if self.image_align == ALIGN_CENTER:
 				ix += bounds.w / 2 - iw / 2
@@ -117,3 +109,4 @@ class Label(Widget):
 			elif self.image_align == ALIGN_LEFT:
 				ix += pl
 			renderer.draw(self.image, ix, bounds.y + (bounds.h / 2 - ih / 2), iw, ih, gray=(not self.enabled))
+		super().render(renderer)

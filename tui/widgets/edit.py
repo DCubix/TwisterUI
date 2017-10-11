@@ -65,8 +65,6 @@ class Edit(Widget):
 			tw, th = renderer.text_size(
 				fid,
 				txt,
-				self.tui.virtual_aspect,
-				self.tui.x_scaling, self.tui.y_scaling,
 				self.font_size
 			)
 			self.__glyphs.append(tw)
@@ -146,8 +144,6 @@ class Edit(Widget):
 			tw, th = renderer.text_size(
 				fid,
 				text,
-				self.tui.virtual_aspect,
-				self.tui.x_scaling, self.tui.y_scaling,
 				self.font_size
 			)
 			text_y = nbounds.y + (nbounds.h/2 - th/2)
@@ -175,8 +171,6 @@ class Edit(Widget):
 				text,
 				nbounds.x, text_y,
 				tcolor,
-				self.tui.virtual_aspect,
-				self.tui.x_scaling, self.tui.y_scaling,
 				self.font_size
 			)
 			renderer.begin()
@@ -204,8 +198,6 @@ class Edit(Widget):
 				_, oth = renderer.text_size(
 					fid,
 					self.text,
-					self.tui.virtual_aspect,
-					self.tui.x_scaling, self.tui.y_scaling,
 					self.font_size
 				)
 				oth += 2
@@ -214,6 +206,7 @@ class Edit(Widget):
 				caret_x += nbounds.x
 				tcol = tcolor if len(tcolor) == 4 else [*tcolor, 1.0]
 				renderer.rectangle(caret_x, otext_y, 1 * self.tui.x_scaling, oth, color=tcol, wire=False)
+		super().render(renderer)
 
 	def __delete_selection(self):
 		if self.__selection > -1:

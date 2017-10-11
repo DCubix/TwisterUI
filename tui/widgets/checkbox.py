@@ -52,18 +52,17 @@ class CheckBox(Label):
 				if self.checked:
 					cm = self.style.textures["CheckBox_Mark_disabled"]
 			if cb:
+				fid = self.style.font.id if self.font is None else self.font.id
 				w, h = renderer.text_size(
-					self.style.font.id,
+					fid,
 					self.text,
-					self.tui.virtual_aspect,
-					self.tui.x_scaling, self.tui.y_scaling,
 					self.font_size
 				)
-				sz = min(w, h)
+				sz = max(w, h)
 				isz = max(cb.width, cb.height)
 				ratio = sz / isz
-				iw = max(cb.width * ratio, cb.width)
-				ih = max(cb.height * ratio, cb.height)
+				iw = min(cb.width * ratio, cb.width)
+				ih = min(cb.height * ratio, cb.height)
 				
 				self.pref_size = (w + iw, h)
 
@@ -97,14 +96,12 @@ class CheckBox(Label):
 
 				color = self.style.text_color if self.enabled else self.style.disabled_text_color
 				renderer.end()
-				fid = self.style.font.id if self.font is None else self.font.id
+				
 				renderer.text(
 					fid,
 					self.text,
 					x, y,
 					color,
-					self.tui.virtual_aspect,
-					self.tui.x_scaling, self.tui.y_scaling,
 					self.font_size
 				)
 				renderer.begin()

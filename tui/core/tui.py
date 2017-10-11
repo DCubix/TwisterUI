@@ -4,6 +4,8 @@ Description: User interface management and logic
 Author:	Diego Lopes (TwisterGE/DCubix) < diego95lopes@gmail.com >
 """
 
+import json
+
 from bge import render, logic, events, types
 from tui.draw import Viewport, ObjectTexture, Renderer
 from .style import Style
@@ -28,7 +30,7 @@ class TUI:
 		self.virtual_height = virtual_height
 
 		self.event_handler = EventHandler()
-		self.renderer = Renderer(self.__output)
+		self.renderer = Renderer(self)
 
 		self.widgets = []
 		self.focused = None
@@ -216,7 +218,7 @@ class TUI:
 			tui.update()
 
 	@staticmethod
-	def get_tui(obj, styleFile, width=1280, height=720, resolution=1):
+	def get_tui(obj, styleFile, width=1280, height=720):
 		"""Gets or creates a system from an object or a scene."""
 		if not isinstance(obj, types.KX_Scene) and not isinstance(obj, types.KX_GameObject):
 			raise ValueError("Object must be a KX_Scene or a KX_GameObject.")
@@ -224,6 +226,16 @@ class TUI:
 		if not hasattr(logic, "tuis"):
 			logic.tuis = {}
 			logic.tui_scenes = []
+
+		if styleFile is None:
+			raise ValueError("Style file must not be None.")
+			return
+
+		resolution = 2
+		with open(styleFile, "r") as f:
+			sfile = json.load(f)
+			if "resolution" in sfile:
+				resolution = int(sfile["resolution"])
 
 		scene = None
 		w = width * resolution
@@ -235,9 +247,6 @@ class TUI:
 			scene = obj.scene
 			output = ObjectTexture(obj, w, h)
 		if obj not in logic.tuis:
-			if styleFile is None:
-				raise ValueError("Style file must not be None.")
-				return
 			logic.tuis[obj] = TUI(styleFile, output, width, height)
 			if scene not in logic.tui_scenes:
 				scene.post_draw.append(TUI.__tui_render)

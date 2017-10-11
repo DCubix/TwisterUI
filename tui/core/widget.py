@@ -109,6 +109,9 @@ class Widget(EventSubscriber):
 		return (self.bounds.w, self.bounds.h)
 
 	def render(self, renderer):
+		#renderer.rectangle(*self.get_corrected_bounds_no_intersect().packed(-3), color=(1.0, 0.0, 0.0, 1.0), wire=True)
+		#renderer.rectangle(*self.get_corrected_bounds_no_intersect().packed(-2), color=(1.0, 0.0, 0.0, 1.0), wire=True)
+		#renderer.rectangle(*self.get_corrected_bounds_no_intersect().packed(-1), color=(1.0, 0.0, 0.0, 1.0), wire=True)
 		pass
 	
 	def update(self):

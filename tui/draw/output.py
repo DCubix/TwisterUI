@@ -65,6 +65,14 @@ class ObjectTexture(Output):
 		self.ray_dist = ray_dist
 
 		self.texture = Texture(width, height)
+		
+		"""
+		GLint drawFboId = 0, readFboId = 0;
+glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFboId);
+glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFboId);
+		"""
+
+		oldfbdraw = GL.glGetIntegerv(GL_FRAMEBUFFER_BINDING)
 
 		self.bindCode = Buffer(GL_INT, 1)
 		glGenFramebuffers(1, self.bindCode)
@@ -75,7 +83,7 @@ class ObjectTexture(Output):
 			GL_TEXTURE_2D,
 			self.texture.bindCode, 0
 		)
-		glBindFramebuffer(GL_FRAMEBUFFER, 0)
+		glBindFramebuffer(GL_FRAMEBUFFER, oldfbdraw)
 
 		VS = '''
 		void main() {
@@ -99,6 +107,7 @@ class ObjectTexture(Output):
 
 		self.__lx = 0
 		self.__ly = 0
+		self.__oldfbdraw = 0
 
 	def get_mouse_position(self):
 		mx = logic.mouse.inputs[events.MOUSEX].values[-1] / render.getWindowWidth()
@@ -119,19 +128,21 @@ class ObjectTexture(Output):
 		return (self.__lx, self.__ly, False)
 
 	def bind(self):
-		glBindFramebuffer(GL_FRAMEBUFFER, self.bindCode[0])
+		#self.__oldfbdraw = GL.glGetIntegerv(GL_FRAMEBUFFER_BINDING)
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0)
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0)
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, self.bindCode[0])
 		glViewport(0, 0, self.width, self.height)
 		glScissor(0, 0, self.width, self.height)
 		glClearColor(*self.background)
 		glClear(GL_COLOR_BUFFER_BIT)
 
 	def unbind(self):
-		glBindFramebuffer(GL_FRAMEBUFFER, 0)
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, self.__oldfbdraw)
 		mat = self.object.meshes[0].materials[0]
 		mat.textures[0].bindCode = self.texture.bindCode
 		if mat.getShader() is not None:
 			mat.getShader().setSampler("tex0", 0)
-
 
 	def __del__(self):
 		glDeleteFramebuffers(1, self.bindCode)
